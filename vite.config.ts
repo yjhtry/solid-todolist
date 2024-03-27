@@ -1,9 +1,15 @@
+import path from 'node:path'
 import { defineConfig } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
 // import devtools from 'solid-devtools/vite';
 import UnocssPlugin from '@unocss/vite'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '~/': `${path.resolve(__dirname, 'src')}/`,
+    },
+  },
   plugins: [
     /*
     Uncomment the following line to enable solid-devtools.

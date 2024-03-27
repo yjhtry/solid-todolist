@@ -40,5 +40,8 @@
     "yaml",
     "toml",
     "astro"
+  ],
+  "cSpell.words": [
+    "todos"
   ]
 }
