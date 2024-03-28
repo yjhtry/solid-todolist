@@ -3,7 +3,9 @@ import type { Component } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Checkbox } from '~/components/Checkbox'
 import { Input } from '~/components/Input'
+import { message } from '~/components/Message'
 import { Textarea } from '~/components/Textarea'
+import { getDb } from '~/db'
 import type { TodoItem } from '~/services/todo'
 
 const TodoForm: Component<RouteSectionProps> = (_props) => {
@@ -13,8 +15,16 @@ const TodoForm: Component<RouteSectionProps> = (_props) => {
     setState(key, value)
   }
 
-  const onSubmit = () => {
-    // todo validation and insert to db
+  const onSubmit = async () => {
+    try {
+      const db = await getDb()
+      await db.todos.insert(state)
+
+      message.success({ message: 'Todo added successfully!' })
+    }
+    catch (error) {
+      message.error({ message: `${(message as any).message}` })
+    }
   }
 
   return (
