@@ -1,4 +1,4 @@
-import { For, type JSX, Show } from 'solid-js'
+import { For, type JSX, Show, mergeProps } from 'solid-js'
 
 export type Columns<T> = Array<{
   title: JSX.Element
@@ -12,7 +12,8 @@ interface TableProps<T> {
   columns: Columns<T>
 }
 
-export function Table<T>(props: TableProps<T>) {
+export function Table<T>(p: TableProps<T>) {
+  const props = mergeProps({ dataSource: [], columns: [] }, p)
   const headers = props.columns.map(column => column.title)
 
   return (

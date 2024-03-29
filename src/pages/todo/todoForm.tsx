@@ -15,6 +15,16 @@ const TodoForm: Component<RouteSectionProps> = (_props) => {
 
   const isEdit = params.id !== undefined
 
+  createEffect(() => {
+    if (params.id) {
+      (async function () {
+        const db = await getDb()
+        const doc = await db.todos.findOne().where('id').eq(params.id).exec()
+        setState(doc._data)
+      }())
+    }
+  })
+
   const onChange = (value: any, key: keyof TodoItem) => {
     setState(key, value)
   }
@@ -48,16 +58,6 @@ const TodoForm: Component<RouteSectionProps> = (_props) => {
       message.error({ message: `${(message as any).message}` })
     }
   }
-
-  createEffect(() => {
-    if (params.id) {
-      (async function () {
-        const db = await getDb()
-        const todo = await db.todos.findOne().where('id').eq(params.id).exec()
-        setState(todo._data)
-      }())
-    }
-  })
 
   return (
     <div class="m-auto mt-10 max-w-xl">

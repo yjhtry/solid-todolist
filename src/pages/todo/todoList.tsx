@@ -1,29 +1,42 @@
 import { A, type RouteSectionProps, useNavigate } from '@solidjs/router'
-import { type Component, createResource } from 'solid-js'
+import { type Component, createEffect, createResource } from 'solid-js'
 import { message } from '~/components/Message'
 import type { Columns } from '~/components/Table'
 import { Table } from '~/components/Table'
 import { getDb } from '~/db'
 import type { TodoDocType } from '~/db/types'
 
-async function fetcher() {
+async function docFetcher() {
   const db = await getDb()
-  const todos = await db.todos.find().sort({ createAt: 'desc' }).exec()
 
-  return todos.map(todo => todo._data)
+  return db.todos
+}
+
+async function dataFetcher(todos) {
+  const todoDocs = await todos.find().sort({ createAt: 'desc' }).exec()
+
+  return todoDocs.map(todo => todo._data)
 }
 
 const TodoList: Component<RouteSectionProps> = (_props) => {
-  const [data, { refetch }] = createResource(fetcher)
   const navigate = useNavigate()
+  const [todos] = createResource(docFetcher)
+
+  const [data, { refetch }] = createResource(() => todos.latest, dataFetcher)
+
+  createEffect(() => {
+    if (todos.latest) {
+      todos.latest.insert$.subscribe(() => refetch())
+      todos.latest.update$.subscribe(() => refetch())
+      todos.latest.remove$.subscribe(() => refetch())
+    }
+  })
 
   const onDelete = async (id: string) => {
     try {
       const db = await getDb()
       const todo = await db.todos.findOne().where('id').eq(id).exec()
       await todo.remove()
-
-      refetch()
 
       message.success({ message: 'Todo deleted successfully!' })
     }
@@ -46,8 +59,8 @@ const TodoList: Component<RouteSectionProps> = (_props) => {
       dataIndex: 'description',
     },
     {
-      title: 'Completed',
-      dataIndex: 'completed',
+      title: 'completion',
+      dataIndex: 'completion',
       render: (value: boolean) => value ? 'Yes' : 'No',
     },
     {

@@ -11,8 +11,9 @@ const Todo: Component<RouteSectionProps> = () => {
     if (params.id) {
       (async function () {
         const db = await getDb()
-        const todo = await db.todos.findOne().where('id').eq(params.id).exec()
-        setTodo(todo._data)
+        const todo = await db.todos.findOne().where('id').eq(params.id)
+
+        todo.$.subscribe(todo => setTodo(todo._data))
       }())
     }
   })
