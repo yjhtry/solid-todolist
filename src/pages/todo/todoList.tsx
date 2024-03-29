@@ -1,35 +1,35 @@
 import { A, type RouteSectionProps, useNavigate } from '@solidjs/router'
-import { type Component, createEffect, createResource } from 'solid-js'
+import { type Component, createResource, onCleanup, onMount } from 'solid-js'
 import { message } from '~/components/Message'
 import type { Columns } from '~/components/Table'
 import { Table } from '~/components/Table'
 import { getDb } from '~/db'
 import type { TodoDocType } from '~/db/types'
 
-async function docFetcher() {
+async function fetcher() {
   const db = await getDb()
-
-  return db.todos
-}
-
-async function dataFetcher(todos) {
-  const todoDocs = await todos.find().sort({ createAt: 'desc' }).exec()
+  const todoDocs = await db.todos.find().sort({ createAt: 'desc' }).exec()
 
   return todoDocs.map(todo => todo._data)
 }
 
 const TodoList: Component<RouteSectionProps> = (_props) => {
   const navigate = useNavigate()
-  const [todos] = createResource(docFetcher)
 
-  const [data, { refetch }] = createResource(() => todos.latest, dataFetcher)
+  const subscribes = [] as Array<{ unsubscribe: () => void }>
 
-  createEffect(() => {
-    if (todos.latest) {
-      todos.latest.insert$.subscribe(() => refetch())
-      todos.latest.update$.subscribe(() => refetch())
-      todos.latest.remove$.subscribe(() => refetch())
-    }
+  const [data, { refetch }] = createResource(fetcher)
+
+  onMount(async () => {
+    const db = await getDb()
+    const todos = db.todos
+    subscribes.push(todos.insert$.subscribe(() => refetch()))
+    subscribes.push(todos.update$.subscribe(() => refetch()))
+    subscribes.push(todos.remove$.subscribe(() => refetch()))
+  })
+
+  onCleanup(() => {
+    subscribes.forEach(subscribe => subscribe.unsubscribe())
   })
 
   const onDelete = async (id: string) => {

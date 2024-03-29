@@ -1,5 +1,5 @@
 import { type RouteSectionProps, useNavigate, useParams } from '@solidjs/router'
-import { type Component, createEffect } from 'solid-js'
+import { type Component, onMount } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Checkbox } from '~/components/Checkbox'
 import { Input } from '~/components/Input'
@@ -15,13 +15,11 @@ const TodoForm: Component<RouteSectionProps> = (_props) => {
 
   const isEdit = params.id !== undefined
 
-  createEffect(() => {
+  onMount(async () => {
     if (params.id) {
-      (async function () {
-        const db = await getDb()
-        const doc = await db.todos.findOne().where('id').eq(params.id).exec()
-        setState(doc._data)
-      }())
+      const db = await getDb()
+      const doc = await db.todos.findOne().where('id').eq(params.id).exec()
+      setState(doc._data)
     }
   })
 
