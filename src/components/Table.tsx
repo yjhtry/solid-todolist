@@ -27,7 +27,7 @@ export function Table<T>(props: TableProps<T>) {
           <div class="p-3">
             <div class="overflow-x-auto">
               <table class="w-full table-auto">
-                <thead class="bg-gray-50 text-xs text-gray-400 font-semibold uppercase">
+                <thead class="bg-gray-50 text-xs text-gray-400 font-semibold">
                   <tr>
                     <For each={headers}>
                       {header => (

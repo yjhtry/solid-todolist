@@ -1,5 +1,5 @@
-import type { RouteSectionProps } from '@solidjs/router'
-import type { Component } from 'solid-js'
+import { type RouteSectionProps, useNavigate, useParams } from '@solidjs/router'
+import { type Component, createEffect } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Checkbox } from '~/components/Checkbox'
 import { Input } from '~/components/Input'
@@ -10,22 +10,54 @@ import type { TodoItem } from '~/services/todo'
 
 const TodoForm: Component<RouteSectionProps> = (_props) => {
   const [state, setState] = createStore<TodoItem>({} as any)
+  const params = useParams<{ id: string }>()
+  const navigate = useNavigate()
+
+  const isEdit = params.id !== undefined
 
   const onChange = (value: any, key: keyof TodoItem) => {
     setState(key, value)
   }
 
+  const onAdd = async () => {
+    const db = await getDb()
+    await db.todos.insert(state)
+
+    message.success({ message: 'Todo added successfully!' })
+  }
+
+  const onEdit = async () => {
+    const db = await getDb()
+    const todo = await db.todos.findOne().where('id').eq(params.id).exec()
+    await todo.update({ $set: { ...state } })
+
+    message.success({ message: 'Todo updated successfully!' })
+  }
+
   const onSubmit = async () => {
     try {
-      const db = await getDb()
-      await db.todos.insert(state)
+      if (isEdit)
+        await onEdit()
+      else
+        await onAdd()
 
-      message.success({ message: 'Todo added successfully!' })
+      navigate('/todo')
     }
     catch (error) {
+      console.error(error)
       message.error({ message: `${(message as any).message}` })
     }
   }
+
+  createEffect(() => {
+    if (params.id) {
+      (async function () {
+        const db = await getDb()
+        const todo = await db.todos.findOne().where('id').eq(params.id).exec()
+        setState(todo._data)
+      }())
+    }
+  })
 
   return (
     <div class="m-auto mt-10 max-w-xl">

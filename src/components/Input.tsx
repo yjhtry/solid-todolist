@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js'
-import { Show, createSignal, mergeProps, splitProps } from 'solid-js'
+import { Show, createEffect, createSignal, mergeProps, splitProps } from 'solid-js'
 import model from '~/directives/model'
 
 const _model = model
@@ -14,7 +14,11 @@ interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'va
 export function Input(p: InputProps) {
   const props = mergeProps({ layout: 'horizontal' }, p)
   const [omit, rest] = splitProps(props, ['onChange', 'value', 'layout', 'label'])
-  const [value, setValue] = createSignal(omit.value || '')
+  const [value, setValue] = createSignal('')
+
+  createEffect(() => {
+    setValue(omit.value || '')
+  })
 
   const onChange = (v: any) => {
     setValue(v)

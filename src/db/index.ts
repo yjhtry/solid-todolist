@@ -11,6 +11,10 @@ import {
   getRxStorageDexie,
 } from 'rxdb/plugins/storage-dexie'
 import { RxDBCleanupPlugin } from 'rxdb/plugins/cleanup'
+import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder'
+import { RxDBUpdatePlugin } from 'rxdb/plugins/update'
+import { RxDBLeaderElectionPlugin } from 'rxdb/plugins/leader-election'
+import { RxDBMigrationPlugin } from 'rxdb/plugins/migration-schema'
 
 import {
   todoSchemaLiteral,
@@ -18,6 +22,10 @@ import {
 import type { MyDatabaseCollections, TodoDocType } from './types'
 
 addRxPlugin(RxDBCleanupPlugin)
+addRxPlugin(RxDBQueryBuilderPlugin)
+addRxPlugin(RxDBUpdatePlugin)
+addRxPlugin(RxDBLeaderElectionPlugin)
+addRxPlugin(RxDBMigrationPlugin)
 
 let dbPromise = null as Promise<RxDatabase<MyDatabaseCollections, any, any, unknown>>
 
@@ -33,11 +41,15 @@ async function _create() {
   await db.addCollections({
     todos: {
       schema: todoSchemaLiteral as RxJsonSchema<TodoDocType>,
+      migrationStrategies: {
+        1: oldDoc => oldDoc,
+      },
     },
   })
 
   db.todos.preInsert((data) => {
     data.id = uuidV4()
+    data.createAt = Date.now()
   }, false)
 
   return db

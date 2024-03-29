@@ -9,7 +9,8 @@ function App() {
     <Router root={Home}>
       <Route path="/todo">
         <Route path="/" component={TodoList} />
-        <Route path={['add', 'edit']} component={TodoForm} />
+        <Route path="add" component={TodoForm} />
+        <Route path="/edit/:id" component={TodoForm} />
         <Route path="/:id" component={Todo} />
       </Route>
     </Router>

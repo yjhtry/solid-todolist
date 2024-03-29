@@ -1,7 +1,7 @@
 export const todoSchemaLiteral = {
   title: 'todo schema',
   description: 'todo list record',
-  version: 0,
+  version: 1,
   primaryKey: 'id',
   type: 'object',
   properties: {
@@ -18,7 +18,10 @@ export const todoSchemaLiteral = {
     completion: {
       type: 'boolean',
     },
+    createAt: {
+      type: 'number',
+    },
   },
   required: ['title', 'description', 'completion'],
-  indexes: ['id', 'title', 'completion'],
+  indexes: ['id', 'title', 'completion', 'createAt'],
 } as const
