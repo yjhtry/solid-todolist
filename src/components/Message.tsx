@@ -30,7 +30,7 @@ function appendTo(el: Node, duration: number, cleanup: () => void) {
   wrapper.appendChild(el)
 
   setTimeout(() => {
-    (el as HTMLElement).classList.add('opacity-100')
+    (el as HTMLElement).classList.add('opacity-100', 'translate-y-0')
   }, 10)
 }
 
@@ -53,7 +53,7 @@ function messageBuilder(className: string) {
       }
 
       el = (
-        <div class={`${className} transition-opacity duration-300 opacity-0`} role="alert">
+        <div class={`${className} transition-all duration-300 opacity-0 translate-y--50`} role="alert">
           <div class="flex p-4">
             {message}
             <Show when={closeable}>
